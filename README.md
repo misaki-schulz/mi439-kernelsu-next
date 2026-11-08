@@ -4,10 +4,10 @@ Public builds of a Linux 4.19.325 kernel with **KernelSU-Next** (`legacy`) for t
 
 ## Download
 
-**[AnyKernel3-kernel-8.zip](https://github.com/misaki-schulz/mi439-kernelsu-next/releases/download/v3.4.0-legacy-run8/AnyKernel3-kernel-8.zip)** — flashable AnyKernel3 package.
+**[AnyKernel3-kernel-9.zip](https://github.com/misaki-schulz/mi439-kernelsu-next/releases/download/v3.4.0-legacy-run9/AnyKernel3-kernel-9.zip)** — flashable AnyKernel3 package.
 
-- sha256: `213eb177b3244b8a50ab5bbb10156e150b577a46e3149c305f7f2670d4f3feba`
-- size: 16,737,918 bytes
+- sha256: `73b2f6ee19109407914e9028dc62db9289ab501eaa8685cd8aa4341aedd4ef96`
+- size: 16,737,744 bytes
 
 See [Releases](https://github.com/misaki-schulz/mi439-kernelsu-next/releases) for all builds.
 
@@ -21,14 +21,22 @@ See [Releases](https://github.com/misaki-schulz/mi439-kernelsu-next/releases) fo
 | Targets | `Image.gz-dtb`, `dtbo.img` |
 | KernelSU-Next | `v3.4.0-legacy` (version `33318`) |
 | KSU hook | Syscall table patching (`CONFIG_KSU_SYSCALL_TABLE_HOOK=y`) |
-| Source commit | `bb678e809` |
-| CI run | `42480297217` |
+| Source commit | `9ef7d914d` |
+| CI run | `42485120730` |
 
 ## Package contents
 
 - `Image.gz-dtb` — kernel image **with the device DTBs appended** (`sdm439-pine`, `sdm439-olive`)
 - `dtbo.img` — device tree overlays for `sdm439-olive` and `sdm439-pine`
 - AnyKernel3 installer (`anykernel.sh`, `META-INF`, `tools`)
+
+## Camera SMMU fix (run 9)
+
+The camera SMMU context banks are brought up by the `qcom,msm-cam-smmu-cb`
+child devices, whose probes can still be pending when the JPEG driver
+registers. The driver then hit `strcmp(NULL, "jpeg_enc0")` and panicked the
+kernel at boot. It now skips banks that have no name yet and returns
+`-EPROBE_DEFER`, so the JPEG driver retries once the banks are up.
 
 > `Image.gz-dtb` (not a bare `Image.gz`) is required: the boot image for mi439
 > appends the DTBs to the kernel, and AnyKernel3 only drops the previous boot
@@ -39,7 +47,7 @@ See [Releases](https://github.com/misaki-schulz/mi439-kernelsu-next/releases) fo
 ## Flashing
 
 1. Boot into TWRP / recovery.
-2. Flash `AnyKernel3-kernel-8.zip`.
+2. Flash `AnyKernel3-kernel-9.zip`.
 3. Reboot.
 
 The package repacks the existing `boot` image and flashes the `dtbo` partition. Device check is disabled (`do.devicecheck=0`); it targets mi439 (`olive` / `olivelite` / `pine` / `olivewood`).
